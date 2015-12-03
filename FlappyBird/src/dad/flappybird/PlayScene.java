@@ -18,39 +18,45 @@ public class PlayScene extends Scene {
 
 	private MenuButton menuButton;
 	private FPSSprite fps;
-	private BirdSprite bird;
+	private JumpingBirdSprite bird;
 	private BackgroundSprite background;
 	private LandSprite land;
 	private GameOverSprite gameover;
 	private GetReadySprite ready;
 	private ScoreSprite score;
-	private List<Sprite> pipes;
+	private List<PipeSprite> pipes;
 	
 	private Random random = new Random();
-	private long time;
+	private long timeBetweenPipes;
 	private boolean isGameover;
 	private int rnd;
 	private boolean betweenPipes;
+	private long pipesDistance;
+	private long globalTime;
+	private float pipesSpeed;
 	
 	@Override
 	protected void init() {
 		
 		background = new BackgroundSprite(this, "bg_day.png");
 		fps = new FPSSprite(this);
-		bird = new BirdSprite(this);
+		bird = new JumpingBirdSprite(this);
 		land = new LandSprite(this);
 		gameover = new GameOverSprite(this);
 		ready = new GetReadySprite(this);
 		menuButton = new MenuButton(this);
-		pipes = new ArrayList<Sprite>();
+		pipes = new ArrayList<PipeSprite>();
 		score = new ScoreSprite(this);
 		
 		gameover.setVisible(false);
 		
 		isGameover = false;
 		betweenPipes = false;
-		time = 0;
+		timeBetweenPipes = 0;
 		rnd = 0;
+		pipesDistance = 1000L;
+		globalTime = 0L;
+		pipesSpeed = PipeSprite.SPEED;
 		
 	}
 
@@ -70,32 +76,45 @@ public class PlayScene extends Scene {
 			gameover.setVisible(true);
 			
 		}
-		else if (!isGameover && !ready.isVisible()) {
+		else if (isPlaying()) {
 			
 			land.update(timeDiff);
 	        background.update(timeDiff);
 			bird.update(timeDiff);
 			score.update(timeDiff);
 			
-			// crea una tubería cada 2 segundos
-			if (time > 1000L + rnd) {
+			// crea una tubería cada 1-1.5 segundos 
+			if (timeBetweenPipes > pipesDistance + rnd) {
 				
 				int pipeY = -100 + random.nextInt(200); 
 				
 				PipeUpSprite newPipeUp = new PipeUpSprite(this);
 				newPipeUp.init();
+				newPipeUp.setSpeed(pipesSpeed);
 				newPipeUp.move(0, pipeY);
 
 				PipeDownSprite newPipeDown = new PipeDownSprite(this);
 				newPipeDown.init();
+				newPipeDown.setSpeed(pipesSpeed);
 				newPipeDown.move(0, pipeY);
 				
 				pipes.add(newPipeUp);
 				pipes.add(newPipeDown);
 
-				time = 0;
+				timeBetweenPipes = 0;
 				
 				rnd = random.nextInt(500);
+			}
+			
+			if (globalTime >= 500L) {
+				pipesDistance -= 10;
+				pipesSpeed -= 5f;
+				for (PipeSprite pipe : pipes) {
+					pipe.setSpeed(pipesSpeed);
+				}
+				land.setSpeed(pipesSpeed);
+				background.setSpeed(background.getSpeed() - 2.5f);
+				globalTime = 0;
 			}
 			
 			// actualiza las tuberías
@@ -110,14 +129,21 @@ public class PlayScene extends Scene {
 			
 			checkCollisions();
 			
-			time += timeDiff;
-			
+			timeBetweenPipes += timeDiff;
+
+			globalTime += timeDiff;
+
 		} 
 		else if (ready.isVisible()){
 			
 			ready.update(timeDiff);
 			
 		}
+		
+	}
+	
+	private boolean isPlaying() {
+		return (!isGameover && !ready.isVisible());
 	}
 
 	@Override

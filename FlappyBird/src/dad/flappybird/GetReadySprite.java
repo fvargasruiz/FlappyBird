@@ -26,10 +26,10 @@ public class GetReadySprite extends ImageSprite {
 			Images.load("text_ready.png"),
 			};
 		current = 0;
-		time = 800L;
+		time = 4000L;
 		setImage(imageSequence[current]);
 		centerOnScene();
-	}
+	} 
 
 	@Override
 	public void update(long timeDiff) {

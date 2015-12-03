@@ -8,14 +8,14 @@ import dad.games.ImageSprite;
 import dad.games.Scene;
 import dad.games.Sound;
 
-public class BirdSprite extends ImageSprite {
+public class FlyingBirdSprite extends ImageSprite {
 	
 	private static final float SPEED = 450.0f; // velocidad en píxeles/segundo (px/s)
 
 	private Image upImage, stillImage, downImage; 
 	private Sound sound;
 	
-	public BirdSprite(Scene screen) {
+	public FlyingBirdSprite(Scene screen) {
 		super(screen);
 		init();
 	}
